@@ -1,0 +1,38 @@
+{
+  "name": "makerlab-103-polly",
+  "version": "1.0.0",
+  "description": "Lab 103 by A Cloud Guru",
+  "main": "",
+  "scripts": {
+    "deployBackend": "sls deploy",
+    "deployFrontend": "cd frontend && sls client deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theam/makerlab-103-Polly.git"
+  },
+  "keywords": [
+    "Polly",
+    "AWS",
+    "A",
+    "Cloud",
+    "Guru",
+    "Lambda",
+    "SNS",
+    "Cloud",
+    "DynamoDB",
+    "S3",
+    "API",
+    "Gateway"
+  ],
+  "author": "",
+  "license": "",
+  "bugs": {
+    "url": "https://github.com/theam/makerlab-103-Polly/issues"
+  },
+  "homepage": "https://github.com/theam/makerlab-103-Polly#readme",
+  "devDependencies": {
+    "serverless": "^1.35.1",
+    "serverless-finch": "^2.3.2"
+  }
+}
