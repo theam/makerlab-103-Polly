@@ -5,8 +5,9 @@ import uuid
 def lambda_handler(event, context):
     
     recordId = str(uuid.uuid4())
-    voice = event["voice"]
-    text = event["text"]
+    requestBody = event["body"]
+    voice = requestBody["voice"]
+    text = requestBody["text"]
 
     print('Generating new DynamoDB record, with ID: ' + recordId)
     print('Input Text: ' + text)
