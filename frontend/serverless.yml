@@ -25,7 +25,7 @@ resources:
         BucketName: ${self:custom.client.bucketName}
         WebsiteConfiguration:
           IndexDocument: index.html
-          ErrorDocument: index.html
+          ErrorDocument: error.html
 
     # specifying the policies to make sure all files inside the Bucket are avaialble
     WebAppS3BucketPolicy:
