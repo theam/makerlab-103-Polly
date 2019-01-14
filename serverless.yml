@@ -1,0 +1,107 @@
+service: <your-service-name>
+package:
+  individually: true
+  exclude:
+    - ./**
+
+provider:
+  name: aws
+  runtime: python2.7
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+        - sns:Publish
+        - polly:SynthesizeSpeech
+        - s3:PutObject
+        - s3:PutObjectAcl
+        - s3:GetBucketLocation
+      Resource: [
+          "*"
+        ]
+
+custom:
+  postsTable: ${self:service}-${self:provider.stage}
+  mediaBucketName: ${self:service}-media-${self:provider.stage}
+  snsTopicName: ${self:service}-topic-${self:provider.stage}
+  snsTopicArn: { "Fn::Join" : ["", ["arn:aws:sns:${self:provider.region}:", { "Ref" : "AWS::AccountId" }, ":${self:custom.snsTopicName}" ] ]  }
+
+functions:
+  getPosts:
+    handler: getPosts.lambda_handler
+    package:
+      include:
+        - "getPosts.py"
+    description: Get posts from Posts table
+    memorySize: 512
+    environment:
+      POSTS_TABLE: ${self:custom.postsTable}
+    events:
+      - http:
+          method: get
+          path: /
+          cors: true
+          integration: lambda
+          request:
+            template:
+              application/json: '{"postId" : "$input.params("postId")"}'
+            passThrough: NEVER
+  newPost:
+    handler: newPost.lambda_handler
+    package:
+      include:
+        - "newPost.py"
+    description: Create a new post in Posts table
+    memorySize: 512
+    environment:
+      POSTS_TABLE: ${self:custom.postsTable}
+      SNS_TOPIC: ${self:custom.snsTopicArn}
+    events:
+      - http:
+          method: post
+          path: /
+          cors: true
+          integration: lambda
+          request:
+            passThrough: NEVER
+  convertToAudio:
+    handler: convertToAudio.lambda_handler
+    package:
+      include:
+        - "convertToAudio.py"
+    description: Convert text to audio with Polly and store it in S3
+    memorySize: 1024
+    timeout: 300
+    environment:
+      POSTS_TABLE: ${self:custom.postsTable}
+      MEDIA_BUCKET_NAME: ${self:custom.mediaBucketName}
+    events:
+      - sns: "${self:custom.snsTopicName}"
+
+resources:
+  Resources:
+    PostsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.postsTable}
+    PostsAudioBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.mediaBucketName}
