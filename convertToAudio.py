@@ -11,7 +11,7 @@ def lambda_handler(event, context):
     
     #Retrieving information about the post from DynamoDB table
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(os.environ['DB_TABLE_NAME'])
+    table = dynamodb.Table(os.environ['POSTS_TABLE'])
     postItem = table.query(
         KeyConditionExpression=Key('id').eq(postId)
     )
@@ -60,13 +60,13 @@ def lambda_handler(event, context):
 
     s3 = boto3.client('s3')
     s3.upload_file('/tmp/' + postId, 
-      os.environ['BUCKET_NAME'], 
+      os.environ['MEDIA_BUCKET_NAME'], 
       postId + ".mp3")
     s3.put_object_acl(ACL='public-read', 
-      Bucket=os.environ['BUCKET_NAME'], 
+      Bucket=os.environ['MEDIA_BUCKET_NAME'], 
       Key= postId + ".mp3")
 
-    location = s3.get_bucket_location(Bucket=os.environ['BUCKET_NAME'])
+    location = s3.get_bucket_location(Bucket=os.environ['MEDIA_BUCKET_NAME'])
     region = location['LocationConstraint']
     
     if region is None:
@@ -75,7 +75,7 @@ def lambda_handler(event, context):
         url_begining = "https://s3-" + str(region) + ".amazonaws.com/" \
     
     url = url_begining \
-            + str(os.environ['BUCKET_NAME']) \
+            + str(os.environ['MEDIA_BUCKET_NAME']) \
             + "/" \
             + str(postId) \
             + ".mp3"

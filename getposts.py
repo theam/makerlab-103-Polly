@@ -7,7 +7,7 @@ def lambda_handler(event, context):
     postId = event["postId"]
     
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(os.environ['DB_TABLE_NAME'])
+    table = dynamodb.Table(os.environ['POSTS_TABLE'])
     
     if postId=="*":
         items = table.scan()
