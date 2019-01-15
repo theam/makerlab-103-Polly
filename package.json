@@ -5,7 +5,9 @@
   "main": "",
   "scripts": {
     "deployBackend": "sls deploy",
-    "deployFrontend": "cd frontend && sls client deploy"
+    "deleteBackend": "sls remove",
+    "deployFrontend": "cd frontend && sls client deploy",
+    "deleteFrontend": "cd frontend && sls client remove"
   },
   "repository": {
     "type": "git",
